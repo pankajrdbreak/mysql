@@ -33,7 +33,7 @@ It will create above above of folders and files
 
 2. Now we will have to prepare this backup as consistent to restore 
 ```console
-xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base
+root@node:~# xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base
 ```
 Here --export option is used so that we can restore single table also
 
@@ -49,6 +49,17 @@ root@node:~# systemctl start mysql
 
 5. Now we will take incremental backups using full backup as a base for that
 6. Also we will prepare incremental backup and attach it to full backup to restore
+```console
+root@node:~# xtrabackup --backup --target-dir=/data/backup/inc1 --incremental-basedir=/data/backup/base/ --datadir=/var/lib/mysql
+root@node:~# xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base --incremental-dir=/data/backup/inc1/
+root@node:~# systemctl stop mysql
+root@node:~# rm -rf /var/lib/mysql/*
+root@node:~# xtrabackup --copy-back --target-dir=/data/backup/base/
+root@node:~# chown -R mysql. /var/lib/mysql
+root@node:~# systemctl start mysql
+```
+
+7. Same process will follow for next incremental backup
 ```console
 root@node:~# xtrabackup --backup --target-dir=/data/backup/inc1 --incremental-basedir=/data/backup/base/ --datadir=/var/lib/mysql
 root@node:~# xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base --incremental-dir=/data/backup/inc1/
