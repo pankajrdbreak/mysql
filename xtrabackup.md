@@ -39,6 +39,9 @@ To restore single table which was dropped you can do fllowing
 
 https://severalnines.com/database-blog/how-restore-single-table-using-percona-xtrabackup
 
+This is useful when you by mistakely deleted data from the table 
+Note: not useful if table is dropped
+
 ```console
 mysql> ALTER TABLE test.cab DISCARD TABLESPACE;
 cp /data/backup/test.* /var/lib/mysql/test/
