@@ -33,3 +33,15 @@ xtrabackup --copy-back --target-dir=/data/backup/base/
 chown -R mysql. /var/lib/mysql
 systemctl start mysql
 ```
+
+
+To restore single table which was dropped you can do fllowing
+
+https://severalnines.com/database-blog/how-restore-single-table-using-percona-xtrabackup
+
+```console
+mysql> ALTER TABLE test.cab DISCARD TABLESPACE;
+cp /data/backup/test.* /var/lib/mysql/test/
+chown mysql.mysql /var/lib/mysql/test/
+mysql> ALTER TABLE test.cab IMPORT TABLESPACE;
+```
