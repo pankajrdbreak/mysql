@@ -116,6 +116,25 @@ Done particular table is restored
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##rough work
 ```console
 xtrabackup --backup --target-dir=/data/backup/base --datadir=/var/lib/mysql
 xtrabackup --backup --target-dir=/data/backup/inc1 --incremental-basedir=/data/backup/base/ --datadir=/var/lib/mysql
