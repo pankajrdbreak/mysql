@@ -1,5 +1,77 @@
 # Mysql Full/Incremental backup using percona xtrabackup tool
 
+Prequisite: Mysql Server with test db
+
+1. First we will take full backup of database
+We have script for that we will run it 
+
+```console
+root@node:~# sh finalbkp.sh full
+root@node:~# cd /data/backup/2022-06-17/base/
+root@node:/data/backup/2022-06-17/base# ll
+total 20552
+drwxr-x--- 11 root root     4096 Jun 17 12:20 ./
+drwxr-xr-x  3 root root     4096 Jun 17 12:19 ../
+-rw-r-----  1 root root      487 Jun 17 12:19 backup-my.cnf
+drwxr-x---  2 root root     4096 Jun 17 12:19 .cache/
+drwxr-x---  2 root root     4096 Jun 17 12:19 .config/
+drwxr-x---  2 root root     4096 Jun 17 12:20 emp/
+-rw-r-----  1 root root      292 Jun 17 12:19 ib_buffer_pool
+-rw-r-----  1 root root 12582912 Jun 17 12:20 ibdata1
+drwxr-x---  2 root root     4096 Jun 17 12:19 .local/
+drwxr-x---  2 root root     4096 Jun 17 12:20 mysql/
+drwxr-x---  2 root root     4096 Jun 17 12:20 PERCONA_SCHEMA/
+drwxr-x---  2 root root     4096 Jun 17 12:19 performance_schema/
+drwxr-x---  2 root root    12288 Jun 17 12:20 sys/
+drwxr-x---  2 root root     4096 Jun 17 12:20 test/
+-rw-r-----  1 root root      133 Jun 17 12:20 xtrabackup_checkpoints
+-rw-r-----  1 root root      458 Jun 17 12:19 xtrabackup_info
+-rw-r-----  1 root root  8388608 Jun 17 12:20 xtrabackup_logfile
+-rw-r--r--  1 root root        1 Jun 17 12:20 xtrabackup_master_key_id
+```
+It will create above above of folders and files
+
+2. Now we will have to prepare this backup as consistent to restore 
+```console
+xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base
+```
+Here --export option is used so that we can restore single table also
+
+3. Now to restore you can delete the entire mysql directory folders and files
+```console 
+root@node:~# systemctl stop mysql
+root@node:~# rm -rf /var/lib/mysql/*
+root@node:~# xtrabackup --copy-back --target-dir=/data/backup/base/
+root@node:~# chown -R mysql. /var/lib/mysql
+root@node:~# systemctl start mysql
+```
+4. All the data is restored
+
+5. Now we will take incremental backups using full backup as a base for that
+6. Also we will prepare incremental backup and attach it to full backup to restore
+```console
+root@node:~# xtrabackup --backup --target-dir=/data/backup/inc1 --incremental-basedir=/data/backup/base/ --datadir=/var/lib/mysql
+root@node:~# xtrabackup --prepare --apply-log-only --export --target-dir=/data/backup/base --incremental-dir=/data/backup/inc1/
+root@node:~# systemctl stop mysql
+root@node:~# rm -rf /var/lib/mysql/*
+root@node:~# xtrabackup --copy-back --target-dir=/data/backup/base/
+root@node:~# chown -R mysql. /var/lib/mysql
+root@node:~# systemctl start mysql
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```console
 xtrabackup --backup --target-dir=/data/backup/base --datadir=/var/lib/mysql
 xtrabackup --backup --target-dir=/data/backup/inc1 --incremental-basedir=/data/backup/base/ --datadir=/var/lib/mysql
