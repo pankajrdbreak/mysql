@@ -70,9 +70,42 @@ root@node:~# chown -R mysql. /var/lib/mysql
 root@node:~# systemctl start mysql
 ```
 
+8. We should also have backups of table structures in case table is dropped
+```console
+root@node:~# mysqldump --no-data -h localhost -u root -ppass test cab > cab_backup.sql
+```
 
+# Situations
+1) Truncate Table / Delete table data
+2) Drop Table
+3) Alter Table
+4) Drop Database
+5) Alter Database
+6) Full Destroy
 
+## In the above situations how we can perform the restore lets see...
 
+1. If we truncate the table by mistake then we can simply restore it using below steps withour restarting server
+```console
+mysql> ALTER TABLE test.cab DISCARD TABLESPACE;
+root@node:~# cp /data/backup/test.* /var/lib/mysql/test/
+root@node:~# chown mysql.mysql /var/lib/mysql/test/
+mysql> ALTER TABLE test.cab IMPORT TABLESPACE;
+```
+2. If we dropped table by mistake then first we have to create that table using backup structure file created in 8th step
+```console
+root@node:~# mysql -u root -p test < cab_backup.sql
+```
+Then copy .cfg .ibd .exp files to /var/lib/mysql/test/
+```console
+mysql> ALTER TABLE test.cab DISCARD TABLESPACE;
+root@node:~# cp /data/backup/2022-06-17/base/test/cab.cfg /var/lib/mysql/test/
+root@node:~# cp /data/backup/2022-06-17/base/test/cab.exp /var/lib/mysql/test/
+root@node:~# cp /data/backup/2022-06-17/base/test/cab.ibd /var/lib/mysql/test/
+root@node:~# chown -R mysql. /var/lib/mysql/test/
+mysql> ALTER TABLE test.cab IMPORT TABLESPACE;
+```
+Done particular table is restored
 
 
 
