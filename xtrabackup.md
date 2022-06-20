@@ -73,8 +73,13 @@ root@node:~# systemctl start mysql
 ```
 
 8. We should also have backups of table structures in case table is dropped
+** to take single table schema backup
 ```console
 root@node:~# mysqldump --no-data -h localhost -u root -ppass test cab > cab_backup.sql
+```
+Or else you can do following steps to create table schema backup
+```console
+root@node:~# sh finalbkp.sh structure
 ```
 
 # Situations
